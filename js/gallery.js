@@ -63,6 +63,7 @@ const images = [
     description: 'Lighthouse Coast Sea',
   },
 ];
+
 const container = document.querySelector('.images');
 let instance;
 
@@ -76,9 +77,9 @@ function createImageTemplate(image) {
       <a class="gallery-link" href="${image.original}">
         <img
           class="gallery-image"
-          src= "${image.preview}"
-          data-source= "${image.original}"
-          alt= "${image.description}"
+          src="${image.preview}"
+          data-source="${image.original}"
+          alt="${image.description}"
         />
       </a>
     </li>`;
@@ -91,10 +92,42 @@ function renderImages() {
 
 renderImages();
 
-container.addEventListener(`click`, (e) => {
+function openModal(image) {
+  instance = basicLightbox.create(
+    `
+    <div class="modal">
+        <img src="${image.original}" alt="${image.description}" />
+        <h3>${image.description}</h3>
+      </div>
+  `,
+    {
+      onShow: (instance) => {
+        window.addEventListener('keydown', handleCloseModal);
+      },
+      onClose: (instance) => {
+        window.removeEventListener('keydown', handleCloseModal);
+      },
+    },
+  );
+
+  instance.show();
+}
+
+function closeModal() {
+  instance.close();
+}
+
+function handleCloseModal(e) {
+  if (e.code === 'Escape') {
+    closeModal();
+  }
+}
+
+container.addEventListener('click', (e) => {
   if (e.target === e.currentTarget) return;
-  const lielem = EventTarget.closet('li');
+
+  const lielem = e.target.closest('li');
   const id = lielem.dataset.id;
   const image = images.find((el) => el.id == id);
-  openModal(product);
+  openModal(image); // Передаємо правильний об'єкт image
 });
