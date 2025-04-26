@@ -20,51 +20,9 @@ const images = [
       'https://cdn.pixabay.com/photo/2019/05/16/09/47/beach-4206785_1280.jpg',
     description: 'Aerial Beach View',
   },
-  {
-    preview:
-      'https://cdn.pixabay.com/photo/2016/11/18/16/19/flowers-1835619__340.jpg',
-    original:
-      'https://cdn.pixabay.com/photo/2016/11/18/16/19/flowers-1835619_1280.jpg',
-    description: 'Flower Blooms',
-  },
-  {
-    preview:
-      'https://cdn.pixabay.com/photo/2018/09/13/10/36/mountains-3674334__340.jpg',
-    original:
-      'https://cdn.pixabay.com/photo/2018/09/13/10/36/mountains-3674334_1280.jpg',
-    description: 'Alpine Mountains',
-  },
-  {
-    preview:
-      'https://cdn.pixabay.com/photo/2019/05/16/23/04/landscape-4208571__340.jpg',
-    original:
-      'https://cdn.pixabay.com/photo/2019/05/16/23/04/landscape-4208571_1280.jpg',
-    description: 'Mountain Lake Sailing',
-  },
-  {
-    preview:
-      'https://cdn.pixabay.com/photo/2019/05/17/09/27/the-alps-4209272__340.jpg',
-    original:
-      'https://cdn.pixabay.com/photo/2019/05/17/09/27/the-alps-4209272_1280.jpg',
-    description: 'Alpine Spring Meadows',
-  },
-  {
-    preview:
-      'https://cdn.pixabay.com/photo/2019/05/16/21/10/landscape-4208255__340.jpg',
-    original:
-      'https://cdn.pixabay.com/photo/2019/05/16/21/10/landscape-4208255_1280.jpg',
-    description: 'Nature Landscape',
-  },
-  {
-    preview:
-      'https://cdn.pixabay.com/photo/2019/05/17/04/35/lighthouse-4208843__340.jpg',
-    original:
-      'https://cdn.pixabay.com/photo/2019/05/17/04/35/lighthouse-4208843_1280.jpg',
-    description: 'Lighthouse Coast Sea',
-  },
 ];
 
-const container = document.querySelector('.images');
+const container = document.querySelector('.gallery');
 let instance;
 
 const imagesCopy = images.map((image, index) => ({
@@ -86,30 +44,30 @@ function createImageTemplate(image) {
 }
 
 function renderImages() {
-  const markup = imagesCopy.map(createImageTemplate).join('\n');
+  const markup = imagesCopy.map(createImageTemplate).join('');
   container.innerHTML = markup;
 }
-
-renderImages();
 
 function openModal(image) {
   instance = basicLightbox.create(
     `
     <div class="modal">
-        <img src="${image.original}" alt="${image.description}" />
+        <img class = "modal-image" src="${image.original}" alt="${image.description}" />
         <h3>${image.description}</h3>
-      </div>
-  `,
+    </div>
+    `,
     {
-      onShow: (instance) => {
+      onShow: () => {
         window.addEventListener('keydown', handleCloseModal);
+
+        const modalImg = instance.element().querySelector(`.modal-image`);
+        modalImg.addEventListener(`click`, () => {
+          closeModal();
+        });
       },
-      onClose: (instance) => {
-        window.removeEventListener('keydown', handleCloseModal);
-      },
+      onClose: () => window.removeEventListener('keydown', handleCloseModal),
     },
   );
-
   instance.show();
 }
 
@@ -124,10 +82,16 @@ function handleCloseModal(e) {
 }
 
 container.addEventListener('click', (e) => {
-  if (e.target === e.currentTarget) return;
+  e.preventDefault();
 
-  const lielem = e.target.closest('li');
-  const id = lielem.dataset.id;
-  const image = images.find((el) => el.id == id);
-  openModal(image); // Передаємо правильний об'єкт image
+  const liElem = e.target.closest('li');
+  if (!liElem) return;
+
+  const id = liElem.dataset.id;
+  const image = imagesCopy.find((el) => el.id == id);
+  if (image) {
+    openModal(image);
+  }
 });
+
+renderImages();
